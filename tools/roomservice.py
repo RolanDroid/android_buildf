@@ -44,10 +44,10 @@ DEBUG = False
 default_manifest = ".repo/manifest.xml"
 
 custom_local_manifest = ".repo/local_manifests/cyanpop_manifest.xml"
-custom_default_revision = "lp5.1"
+custom_default_revision = "cm-13.0"
 custom_dependencies = "cyanpop.dependencies"
-org_manifest = "CyanPop"  # leave empty if org is provided in manifest
-org_display = "CyanPop"  # needed for displaying
+org_manifest = "CyanPop-Devices"  # leave empty if org is provided in manifest
+org_display = "CyanPop-Devices"  # needed for displaying
 
 github_auth = None
 
