@@ -739,10 +739,10 @@ function eat()
             return 1
         fi
         adb start-server # Prevent unexpected starting server message from adb get-state in the next line
-        if [ $(adb get-state) != device -a $(adb shell busybox test -e /sbin/recovery 2> /dev/null; echo $?) != 0 ] ; then
+        if [ $(adb get-state) != device -a $(adb shell test -e /sbin/recovery 2> /dev/null; echo $?) != 0 ] ; then
             echo "No device is online. Waiting for one..."
             echo "Please connect USB and/or enable USB debugging"
-            until [ $(adb get-state) = device -o $(adb shell busybox test -e /sbin/recovery 2> /dev/null; echo $?) = 0 ];do
+            until [ $(adb get-state) = device -o $(adb shell test -e /sbin/recovery 2> /dev/null; echo $?) = 0 ];do
                 sleep 1
             done
             echo "Device Found.."
@@ -2172,10 +2172,10 @@ function dopush()
     shift
 
     adb start-server # Prevent unexpected starting server message from adb get-state in the next line
-    if [ $(adb get-state) != device -a $(adb shell busybox test -e /sbin/recovery 2> /dev/null; echo $?) != 0 ] ; then
+    if [ $(adb get-state) != device -a $(adb shell test -e /sbin/recovery 2> /dev/null; echo $?) != 0 ] ; then
         echo "No device is online. Waiting for one..."
         echo "Please connect USB and/or enable USB debugging"
-        until [ $(adb get-state) = device -o $(adb shell busybox test -e /sbin/recovery 2> /dev/null; echo $?) = 0 ];do
+        until [ $(adb get-state) = device -o $(adb shell test -e /sbin/recovery 2> /dev/null; echo $?) = 0 ];do
             sleep 1
         done
         echo "Device Found."
@@ -2206,10 +2206,18 @@ function dopush()
     fi
 
     # Install: <file>
-    LOC="$(cat $OUT/.log | sed -r 's/\x1B\[([0-9]{1,2}(;[0-9]{1,2})?)?[m|K]//g' | grep '^Install: ' | cut -d ':' -f 2)"
+    if [ `uname` = "Linux" ]; then
+        LOC="$(cat $OUT/.log | sed -r 's/\x1B\[([0-9]{1,2}(;[0-9]{1,2})?)?[m|K]//g' | grep '^Install: ' | cut -d ':' -f 2)"
+    else
+        LOC="$(cat $OUT/.log | sed -E "s/"$'\E'"\[([0-9]{1,3}((;[0-9]{1,3})*)?)?[m|K]//g" | grep '^Install: ' | cut -d ':' -f 2)"
+    fi
 
     # Copy: <file>
-    LOC="$LOC $(cat $OUT/.log | sed -r 's/\x1B\[([0-9]{1,2}(;[0-9]{1,2})?)?[m|K]//g' | grep '^Copy: ' | cut -d ':' -f 2)"
+    if [ `uname` = "Linux" ]; then
+        LOC="$LOC $(cat $OUT/.log | sed -r 's/\x1B\[([0-9]{1,2}(;[0-9]{1,2})?)?[m|K]//g' | grep '^Copy: ' | cut -d ':' -f 2)"
+    else
+        LOC="$LOC $(cat $OUT/.log | sed -E "s/"$'\E'"\[([0-9]{1,3}((;[0-9]{1,3})*)?)?[m|K]//g" | grep '^Copy: ' | cut -d ':' -f 2)"
+    fi
 
     # If any files are going to /data, push an octal file permissions reader to device
     if [ -n "$(echo $LOC | egrep '(^|\s)/data')" ]; then
